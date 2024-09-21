@@ -8,6 +8,9 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "3.12.*"
 fastapi = { extras = ["standard"], version = "^0.114.2" }
+sqlalchemy = "^2.0.35"
+pydantic-settings = "^2.5.2"
+alembic = "^1.13.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.5"
@@ -17,7 +20,7 @@ taskipy = "^1.13.0"
 pytest-xdist = "^3.6.1"
 
 [tool.ruff]
-line-length = 79
+line-length = 80
 extend-exclude = ["migrations"]
 
 [tool.ruff.lint]
