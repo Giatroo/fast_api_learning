@@ -4,7 +4,7 @@ from http import HTTPStatus
 import sqlalchemy as sa
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt import decode, encode
+from jwt import ExpiredSignatureError, decode, encode
 from jwt.exceptions import PyJWTError
 from pwdlib import PasswordHash
 from sqlalchemy.orm import Session
@@ -58,6 +58,8 @@ def get_current_user(
         username = payload.get("sub")
         if not username:
             raise credentials_exception
+    except ExpiredSignatureError as exp:
+        raise credentials_exception from exp
     except PyJWTError as exp:
         raise credentials_exception from exp
 

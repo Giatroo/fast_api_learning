@@ -1,3 +1,4 @@
+import factory
 import pytest
 import sqlalchemy as sa
 from fastapi.testclient import TestClient
@@ -6,6 +7,15 @@ from fast_duno.app import app
 from fast_duno.database import get_session
 from fast_duno.models import User, table_registry
 from fast_duno.security import get_password_hash
+
+
+class UserFactory(factory.Factory):
+    class Meta:
+        model = User
+
+    username = factory.Sequence(lambda n: f"test{n}")
+    email = factory.LazyAttribute(lambda obj: f"{obj.username}@test.com")
+    password = factory.LazyAttribute(lambda obj: f"{obj.username}+senha")
 
 
 @pytest.fixture
@@ -37,21 +47,28 @@ def session():
 
 
 @pytest.fixture
-def user(session):
+def user(session) -> User:
     pwd = "testtest"
-    user = User(
-        username="Teste",
-        email="teste@test.com",
-        password=get_password_hash(pwd),
-    )
+    user_: User = UserFactory(password=get_password_hash(pwd))
 
-    session.add(user)
+    session.add(user_)
     session.commit()
-    session.refresh(user)
+    session.refresh(user_)
 
-    user.clean_password = pwd
+    user_.clean_password = pwd
 
-    return user
+    return user_
+
+
+@pytest.fixture
+def other_user(session) -> User:
+    user_: User = UserFactory()
+
+    session.add(user_)
+    session.commit()
+    session.refresh(user_)
+
+    return user_
 
 
 @pytest.fixture
@@ -63,4 +80,5 @@ def token(client, user):
             "password": user.clean_password,
         },
     )
+    return response.json()["access_token"]
     return response.json()["access_token"]

@@ -27,7 +27,7 @@ def test_create_user_with_existing_username(client: TestClient, user):
     response = client.post(
         "/users/",
         json={
-            "username": "Teste",
+            "username": user.username,
             "email": "something@else.com",
             "password": "adifferentpassword",
         },
@@ -42,7 +42,7 @@ def test_create_user_with_existing_email(client: TestClient, user):
         "/users/",
         json={
             "username": "somethingelse",
-            "email": "teste@test.com",
+            "email": user.email,
             "password": "adifferentpassword",
         },
     )
@@ -101,9 +101,9 @@ def test_update_user(client: TestClient, user, token):
     }
 
 
-def test_update_user_raises_not_found(client: TestClient, token):
+def test_update_user_raises_not_found(client: TestClient, other_user, token):
     response = client.put(
-        "/users/1234",
+        f"/users/{other_user.id}",
         headers={"Authorization": f"Bearer {token}"},
         json={
             "username": "testuser2",
@@ -125,9 +125,9 @@ def test_delete_user(client: TestClient, user, token):
     assert response.json() == {"message": "User deleted"}
 
 
-def test_delete_user_raises_not_found(client: TestClient, token):
+def test_delete_user_raises_not_found(client: TestClient, other_user, token):
     response = client.delete(
-        "/users/1234", headers={"Authorization": f"Bearer {token}"}
+        f"/users/{other_user.id}", headers={"Authorization": f"Bearer {token}"}
     )
 
     assert response.status_code == HTTPStatus.FORBIDDEN
